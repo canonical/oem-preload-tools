@@ -1,0 +1,3 @@
+[submodule "livefs-editor"]
+	path = livefs-editor
+	url = https://github.com/mwhudson/livefs-editor.git
