@@ -13,4 +13,6 @@ A set of tools to help with handling Ubuntu OEM preload images.
 
 ## Contents
 
+* `setup.sh` - initialize the required environment for the tools
 * `vendor-inject.sh` - inject vendor specific files into the Ubuntu OEM image
+                       or into USB stick
