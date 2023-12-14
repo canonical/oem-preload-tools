@@ -17,6 +17,6 @@ if [ ! -L "$VENDOR-inject.sh" ]; then
 	ln -s vendor-inject.sh "$VENDOR-inject.sh"
 fi
 
-if [ ! -d "livefs-editor" ]; then
+if [ ! -f "livefs-editor/livefs_edit/__main__.py" ]; then
 	git submodule update --init
 fi
