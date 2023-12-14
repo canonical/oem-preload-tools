@@ -2,15 +2,14 @@
 # vim: ts=4 sw=4 noet
 # This script is used to inject vendor specific files into the Ubuntu OEM image
 # Usage: 
-#  Link this script to the vendor specific script, e.g.
-#   $ ln -s vendor-inject.sh lenovo-inject.sh
-#   $ ln -s vendor-inject.sh hp-inject.sh
+#  Call setup.sh first to setup the required environment for the vendor tools
+#  ./setup.sh <vendor>
 #
 #  Run the script with the archive file and the target iso file
-#  ./lenovo-inject.sh ARCHIVE_FILE ISO_FILE
+#  ./<vendor>-inject.sh ARCHIVE_FILE ISO_FILE
 #
 #  Or run the script with the archive file and the target USB partition
-#  ./lenovo-inject.sh ARCHIVE_FILE ISO_FILE /media/ubuntu/USB_PARTITION
+#  ./<vendor>-inject.sh ARCHIVE_FILE ISO_FILE /media/ubuntu/USB_PARTITION
 #
 # Maintainer:
 #  Bin Li <bin dot li at canonical dot com>
@@ -20,6 +19,11 @@ VENDOR=$(basename "$0" | sed 's/-.*//')
 ARCHIVE=$1
 ISO_FILE=$2
 USB_PARTITION=$3
+
+if [ "$VENDOR" = "vendor" ]; then
+	echo "Please run setup.sh first then use <vendor>-inject.sh"
+	exit 1
+fi
 
 if [ -z "$ARCHIVE" ] || [ -z "$ISO_FILE" ]; then
     echo "Usage: $0 ARCHIVE_FILE ISO_FILE"
@@ -33,9 +37,6 @@ if [ ! -f "$ARCHIVE" ]; then
 fi
 # Generate the OEM facotry image with the archive file
 if [ -z "$USB_PARTITION" ]; then
-	if [ ! -d "$livefs-editor" ]; then
-		git pull https://github.com/mwhudson/livefs-editor.git
-	fi
     sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
 	    "$INJFS" \
 	    "${INJFS%.iso}-factory.iso" \
@@ -67,8 +68,8 @@ if [ "$usb_size" -lt "$iso_size" ] ; then
 	exit 1
 fi
 if [ "$left_usb_size" -lt "$iso_size" ] ; then
-	echo "Used $used_usb_size in partition $USB_PARTITION, want clean (y/n)?"
-	read answer
+	echo "NOT enough space, $used_usb_size MB is used in partition $USB_PARTITION, want clean (y/n)?"
+	read -r answer
 	if [ "$answer" == "y" ] ; then
 		sudo rm -rf "$USB_PARTITION"/*
 		sudo rm -rf "$USB_PARTITION"/.*
@@ -79,7 +80,8 @@ fi
 
 echo "Mounting the ISO image..."
 sudo mkdir -p /tmp/iso
-sudo mount -o loop "$ISO_FILE" /tmp/iso
+sudo mount -o loop,ro "$ISO_FILE" /tmp/iso
+echo "Copying the ISO image to the USB partition..."
 rsync -alvq /tmp/iso/ "$USB_PARTITION"/
 sudo umount /tmp/iso
 mkdir -p "$USB_PARTITION"/"$VENDOR"-oem
