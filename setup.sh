@@ -20,3 +20,9 @@ fi
 if [ ! -f "livefs-editor/livefs_edit/__main__.py" ]; then
 	git submodule update --init
 fi
+
+# Check if the xorriso and squashfs-tools are installed
+if ! command -v xorriso > /dev/null; then
+	echo "Installing xorriso"
+	sudo apt install -y xorriso squashfs-tools liblz4-tool
+fi
