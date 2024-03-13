@@ -32,7 +32,7 @@ if [ -z "$ARCHIVE" ] || [ -z "$ISO_FILE" ]; then
 fi
 
 # check ARCHIVE is a full path name or not
-if [ "${ARCHIVE:0:1}" != "/" -a "${ARCHIVE:0:1}" != "~" ]; then
+if [ "${ARCHIVE:0:1}" != "/" ] && [ "${ARCHIVE:0:1}" != "~" ]; then
 	ARCHIVE_FILENAME=${ARCHIVE}
 	ARCHIVE=$PWD/$ARCHIVE
 else
@@ -51,7 +51,7 @@ if [ -z "$USB_PARTITION" ]; then
 	    "${NEW_ISO_FILE}" \
 	    --cp "${ARCHIVE}" "new/iso/${VENDOR}-oem/${ARCHIVE_FILENAME}"
 	if [ -e "${NEW_ISO_FILE}" ]; then
-		sudo chown $USER:$USER ${NEW_ISO_FILE}
+		sudo chown "$USER":"$USER" "${NEW_ISO_FILE}"
 	fi
     exit 0
 fi
