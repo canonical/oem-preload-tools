@@ -31,6 +31,14 @@ if [ -z "$ARCHIVE" ] || [ -z "$ISO_FILE" ]; then
     exit 1
 fi
 
+# check ARCHIVE is a full path name or not
+if [ "${ARCHIVE:0:1}" != "/" -a "${ARCHIVE:0:1}" != "~" ]; then
+	ARCHIVE_FILENAME=${ARCHIVE}
+	ARCHIVE=$PWD/$ARCHIVE
+else
+	ARCHIVE_FILENAME=$(basename "$ARCHIVE")
+fi
+
 if [ ! -f "$ARCHIVE" ]; then
     echo "Please download archive.tar.gz from https://oem-share.canonical.com/"
     exit 1
@@ -41,7 +49,7 @@ if [ -z "$USB_PARTITION" ]; then
     sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
 	    "${ISO_FILE}" \
 	    "${NEW_ISO_FILE}" \
-	    --cp "$PWD/$ARCHIVE" "new/iso/${VENDOR}-oem/${ARCHIVE}"
+	    --cp "${ARCHIVE}" "new/iso/${VENDOR}-oem/${ARCHIVE_FILENAME}"
 	if [ -e "${NEW_ISO_FILE}" ]; then
 		sudo chown $USER:$USER ${NEW_ISO_FILE}
 	fi
