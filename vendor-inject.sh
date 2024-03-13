@@ -37,11 +37,14 @@ if [ ! -f "$ARCHIVE" ]; then
 fi
 # Generate the OEM facotry image with the archive file
 if [ -z "$USB_PARTITION" ]; then
+	NEW_ISO_FILE="${ISO_FILE%.iso}-factory.iso"
     sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
-	    "$INJFS" \
-	    "${INJFS%.iso}-factory.iso" \
-	    --cp "$PWD/$ARCHIVE" "new/iso/$VENDOR-oem/$ARCHIVE"
-
+	    "${ISO_FILE}" \
+	    "${NEW_ISO_FILE}" \
+	    --cp "$PWD/$ARCHIVE" "new/iso/${VENDOR}-oem/${ARCHIVE}"
+	if [ -e "${NEW_ISO_FILE}" ]; then
+		sudo chown $USER:$USER ${NEW_ISO_FILE}
+	fi
     exit 0
 fi
 
