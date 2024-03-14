@@ -1,0 +1,13 @@
+diff --git a/livefs_edit/context.py b/livefs_edit/context.py
+index e39bba5..c167f3b 100644
+--- a/livefs_edit/context.py
++++ b/livefs_edit/context.py
+@@ -328,7 +328,7 @@ class EditContext:
+         opts = shlex.split(cp.stdout)
+         with self.logged("recreating ISO"):
+             cmd = ['xorriso', '-as', 'mkisofs'] + opts + \
+-                ['-o', destpath, '-V', 'Ubuntu custom', self.p('new/iso')]
++                ['-o', destpath, '-V', 'OEM custom', self.p('new/iso')]
+             self.log("running: " + ' '.join(map(shlex.quote, cmd)))
+             self.run(cmd)
+ 

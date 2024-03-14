@@ -26,3 +26,8 @@ if ! command -v xorriso > /dev/null; then
 	echo "Installing xorriso"
 	sudo apt install -y xorriso squashfs-tools liblz4-tool
 fi
+
+# Check if the 'OEM custom' is in the livefs-editor, if not, apply patch for it
+if ! grep -q "OEM custom" livefs-editor/livefs_edit/context.py; then
+	patch -d livefs-editor/ -p1 < livefs-editor.patch
+fi
