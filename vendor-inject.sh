@@ -31,13 +31,8 @@ if [ -z "$ARCHIVE" ] || [ -z "$ISO_FILE" ]; then
     exit 1
 fi
 
-# check ARCHIVE is a full path name or not
-if [ "${ARCHIVE:0:1}" != "/" ] && [ "${ARCHIVE:0:1}" != "~" ]; then
-	ARCHIVE_FILENAME=${ARCHIVE}
-	ARCHIVE=$PWD/$ARCHIVE
-else
-	ARCHIVE_FILENAME=$(basename "$ARCHIVE")
-fi
+ARCHIVE=$(realpath "$ARCHIVE")
+ARCHIVE_FILENAME=$(basename "$ARCHIVE")
 
 if [ ! -f "$ARCHIVE" ]; then
     echo "Please download archive.tar.gz from https://oem-share.canonical.com/"
