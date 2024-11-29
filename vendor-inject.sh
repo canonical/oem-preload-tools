@@ -21,8 +21,8 @@ ISO_FILE=$2
 USB_PARTITION=$3
 
 if [ "$VENDOR" = "vendor" ]; then
-	echo "Please run setup.sh first then use <vendor>-inject.sh"
-	exit 1
+    echo "Please run setup.sh first then use <vendor>-inject.sh"
+    exit 1
 fi
 
 if [ -z "$ARCHIVE" ] || [ -z "$ISO_FILE" ]; then
@@ -35,26 +35,34 @@ ARCHIVE=$(realpath "$ARCHIVE")
 ARCHIVE_FILENAME=$(basename "$ARCHIVE")
 
 if [ ! -f "$ARCHIVE" ]; then
-    echo "Please download archive.tar.gz from https://oem-share.canonical.com/"
+    echo "Please download .tar.gz or .tar.zst from https://oem-share.canonical.com/"
     exit 1
 fi
+
 # Generate the OEM facotry image with the archive file
 if [ -z "$USB_PARTITION" ]; then
-	NEW_ISO_FILE="${ISO_FILE%.iso}-factory.iso"
-    sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
-	    "${ISO_FILE}" \
-	    "${NEW_ISO_FILE}" \
-	    --cp "${ARCHIVE}" "new/iso/${VENDOR}-oem/${ARCHIVE_FILENAME}"
-	if [ -e "${NEW_ISO_FILE}" ]; then
-		sudo chown "$USER":"$USER" "${NEW_ISO_FILE}"
-	fi
+    NEW_ISO_FILE="${ISO_FILE%.iso}-factory.iso"
+    if [ "${ARCHIVE_FILENAME/.zst/}" = "${ARCHIVE_FILENAME}" ]; then
+        sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
+            "${ISO_FILE}" \
+            "${NEW_ISO_FILE}" \
+            --cp "${ARCHIVE}" "new/iso/${VENDOR}-oem/${ARCHIVE_FILENAME}"
+    else
+        sudo PYTHONPATH=./livefs-editor python3 -m livefs_edit \
+            "${ISO_FILE}" \
+            "${NEW_ISO_FILE}" \
+            --shell "cd new/iso/sideloads/;tar xvf ${ARCHIVE}"
+    fi
+    if [ -e "${NEW_ISO_FILE}" ]; then
+        sudo chown "$USER":"$USER" "${NEW_ISO_FILE}"
+    fi
     exit 0
 fi
 
 # Make sure the USB partition is not root or home
 if [ "$USB_PARTITION" == "/" ] || [ "$USB_PARTITION" == "/home" ]; then
-	echo "Please specify a correct USB partition"
-	exit 1
+    echo "Please specify a correct USB partition"
+    exit 1
 fi
 # Check permission of USB partition, if not writable, exit
 if [ ! -w "$USB_PARTITION" ]; then
@@ -74,14 +82,14 @@ if [ "$usb_size" -lt "$iso_size" ] ; then
 	exit 1
 fi
 if [ "$left_usb_size" -lt "$iso_size" ] ; then
-	echo "NOT enough space, $used_usb_size MB is used in partition $USB_PARTITION, want clean (y/n)?"
-	read -r answer
-	if [ "$answer" == "y" ] ; then
-		sudo rm -rf "$USB_PARTITION"/*
-		sudo rm -rf "$USB_PARTITION"/.*
-	else
-		exit 1
-	fi
+    echo "NOT enough space, $used_usb_size MB is used in partition $USB_PARTITION, want clean (y/n)?"
+    read -r answer
+    if [ "$answer" == "y" ] ; then
+        sudo rm -rf "$USB_PARTITION"/*
+        sudo rm -rf "$USB_PARTITION"/.*
+    else
+        exit 1
+    fi
 fi
 
 echo "Mounting the ISO image..."
@@ -90,8 +98,12 @@ sudo mount -o loop,ro "$ISO_FILE" /tmp/iso
 echo "Copying the ISO image to the USB partition..."
 rsync -alvq /tmp/iso/ "$USB_PARTITION"/
 sudo umount /tmp/iso
-mkdir -p "$USB_PARTITION"/"$VENDOR"-oem
-rsync -qlvq "$ARCHIVE" "$USB_PARTITION"/"$VENDOR"-oem/
+if [ "${ARCHIVE_FILENAME/.zst/}" = "${ARCHIVE_FILENAME}" ]; then
+    mkdir -p "$USB_PARTITION"/"$VENDOR"-oem
+    rsync -qlvq "$ARCHIVE" "$USB_PARTITION"/"$VENDOR"-oem/
+else
+    tar xvf ${ARCHIVE} -C "$USB_PARTITION"/sideloads/
+fi
 sudo sync
 sudo umount "$USB_PARTITION"
 echo "Please remove the USB drive and boot from it"
