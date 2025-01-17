@@ -10,6 +10,7 @@ A set of tools to help with handling Ubuntu OEM preload images.
   * User Guide packages
   * Wallpaper packages
   * Vendor specific packages
+  * Sideload packages (Supported from 24.04 only)
 
 ## Contents
 
