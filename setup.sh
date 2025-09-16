@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim: ts=4 sw=4 noet
 # This script is used to setup the required environment for the vendor tools
 #
