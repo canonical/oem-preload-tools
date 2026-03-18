@@ -12,7 +12,7 @@
 #  ./<vendor>-inject.sh ARCHIVE_FILE ISO_FILE /media/ubuntu/USB_PARTITION
 #
 # Maintainer:
-#  Bin Li <bin dot li at canonical dot com>
+#  Bin Li <binli at ubuntu dot com>
 
 # get the vendor name from $0
 VENDOR=$(basename "$0" | sed 's/-.*//')
